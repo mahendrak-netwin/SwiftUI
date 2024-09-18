@@ -1,0 +1,73 @@
+// ============== PARENT VIEW ===================== //
+// Binding is used                                               
+//  toggleParentView.swift
+//  Practice03
+//
+//  Created by netwin on 13/09/24.
+//
+
+import SwiftUI
+
+struct toggleParentView: View {
+    @State private var isOn: Bool = false
+    @State private var isShowingAlert: Bool = false
+    var body: some View {
+        VStack{
+            Text("Breaking Bad")
+                .font(.system(size: 50))
+                .fontWeight(.bold)
+                .foregroundColor(isOn ? .blue: .gray)
+            
+            Text("Now Showing")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            toggleChildView(isOn: $isOn, isShowingAlert: $isShowingAlert)
+            
+        }.alert("YE ALERT HAI", isPresented: $isShowingAlert){
+            Button("Try again"){
+                
+            }
+        }
+    message:{
+        Text("It is caused as you toggled the button")
+    }
+    }
+}
+
+#Preview {
+    toggleParentView()
+}
+
+
+
+// ========================= Child View ====================================
+
+
+//
+//  toggleChildView.swift
+//  Practice03
+//
+//  Created by netwin on 13/09/24.
+//
+
+import SwiftUI
+
+struct toggleChildView: View {
+    @Binding var isOn : Bool
+    @Binding var isShowingAlert: Bool
+    var body: some View {
+        VStack{
+            Toggle(isOn: $isOn , label: {
+                Text("now watching")
+            }).fixedSize()
+            Toggle(isOn: $isShowingAlert, label: {
+                Text("For Alert toggle")
+            }).fixedSize()
+        }
+    }
+}
+
+#Preview {
+    toggleChildView(isOn: .constant(false), isShowingAlert: .constant(false))
+}
