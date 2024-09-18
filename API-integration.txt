@@ -95,6 +95,8 @@ struct ContentView: View {
         isLoading = true
         errorMessage = nil
 
+// ======------  For Single Page ----------===================
+
         do {
 // Here the second parameter is ignored it is status code (data,response)
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -109,6 +111,35 @@ struct ContentView: View {
 
         isLoading = false
     }
+
+// ========-------- For Multiple Pages ----------==================
+
+ // Loop through pages until no more data
+            while moreData {
+                guard let url = URL(string: "https://reqres.in/api/users?page=\(currentPage)") else {
+                    print("Invalid URL for page")
+                    return
+                }
+
+                do {
+                    let (data, _) = try await URLSession.shared.data(from: url)
+                    let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
+
+                    if decodedResponse.data.isEmpty {
+                        moreData = false // Stop if the page returns no users
+                    } else {
+                        users.append(contentsOf: decodedResponse.data) // Add new users to the list
+                        currentPage += 1 // Move to the next page
+                    }
+
+                } catch {
+                    errorMessage = "Failed to load data: \(error.localizedDescription)"
+                    moreData = false
+                }
+            }
+
+            isLoading = false
+        }
 }
 
 #Preview {
