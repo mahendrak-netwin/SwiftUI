@@ -1,0 +1,67 @@
+//
+//  ContentView.swift
+//  Practice04
+//
+//  Created by netwin on 05/09/24.
+//  State is used to refelect the changes after user perform some actions
+
+import SwiftUI
+
+struct ContentView: View {
+    
+    @State private var status: String = "Not Playing"
+    @State private var isPlaying: Bool = false
+    
+    var body: some View {
+        ZStack {
+            Color.green
+                .ignoresSafeArea(.all)
+            VStack{
+              Image("song_img")
+                    .resizable()
+                    .frame(width: 280, height: 280)
+                    .cornerRadius(18)
+                
+                Text(self.status)
+                    .frame(maxWidth: 270, alignment: .leading)
+                    .fontWeight(.bold)
+                    .font(.system(size: 30))
+                    .padding(20)
+                    
+                
+                HStack(alignment: .center, spacing: 60){
+                    Button(action: {
+                        debugPrint("Backward Button Pressed")
+                    }, label: {
+                        Image(systemName: "backward.end.circle.fill")
+                            .resizable()
+                            .frame(width: 55, height: 55, alignment: .center)
+                    })
+                    
+                    Button(action: {
+                        self.isPlaying.toggle()
+                        self.status = self.isPlaying ? "Playing" : "Not playing"
+                        debugPrint("Play/Pause Button Pressed")
+                    }, label: {
+                        Image(systemName: self.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                            .resizable()
+                            .frame(width: 55, height: 55, alignment: .center)
+                    })
+                    
+                    Button(action: {
+                        debugPrint("Forward Button Pressed")
+                    }, label: {
+                        Image(systemName: "forward.end.circle.fill")
+                            .resizable()
+                            .frame(width: 55, height: 55, alignment: .center)
+                    })
+                }
+                .padding(40)
+            }
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+}
