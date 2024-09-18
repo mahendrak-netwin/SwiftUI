@@ -1,0 +1,116 @@
+//
+//  ContentView.swift
+//  Basic01
+//
+//  Created by netwin on 04/09/24.
+//
+
+import SwiftUI
+
+// Define the structures to decode the JSON response
+struct Response: Codable {
+    var data: [User]
+}
+
+struct User: Codable, Identifiable {
+    var id: Int
+    var email: String
+    var first_name: String
+    var last_name: String
+    var avatar: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case email
+        case first_name
+        case last_name
+        case avatar
+    }
+}
+
+struct ContentView: View {
+    @State private var users = [User]()
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                if isLoading {
+                    ProgressView("Loading data....")
+                } else if let errorMessage = errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    List(users) { user in
+                        HStack {
+                            AsyncImage(url: URL(string: user.avatar)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Circle())
+                                case .failure:
+                                    Image(systemName: "person.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Circle())
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+
+                            VStack(alignment: .leading) {
+                                Text("\(user.first_name) \(user.last_name)")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                                Text(user.email)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Users")
+            .task {
+//                Function which is being called is asynchronous It takes time to complete
+                await loadData()
+            }
+        }
+    }
+
+    func loadData() async {
+        guard let url = URL(string: "https://reqres.in/api/users?page=1") else {
+            print("Invalid URL")
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+
+        do {
+// Here the second parameter is ignored it is status code (data,response)
+            let (data, _) = try await URLSession.shared.data(from: url)
+//            alternative network libraries like Alamo fire instead of URLsession
+//            Json decoder to convert JSON data to Swift Object
+            let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
+            users = decodedResponse.data
+        } catch {
+            errorMessage = "Failed to load data: \(error.localizedDescription)"
+            //localized description for exactly knowing what error has occured 
+        }
+
+        isLoading = false
+    }
+}
+
+#Preview {
+    ContentView()
+}
